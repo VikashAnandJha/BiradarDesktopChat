@@ -79,8 +79,8 @@ const ChatScreen = ({ params }) => {
     <div className="flex flex-col h-screen">
       {/* Header */}
       <div className="bg-gray-200 p-2 flex flex-row items-center">
-        <IconButton>
-          <ArrowBack onClick={() => router.back()} />
+        <IconButton onClick={() => router.back()}>
+          <ArrowBack />
         </IconButton>
         <div className="text-xl font-bold ml-2">{params.id}</div>
       </div>
