@@ -1,8 +1,8 @@
 export const data = [
   {
     id: 1,
-    name: "Leanne Graham",
-    username: "Bret",
+    name: "vikash",
+    username: "vikash",
     email: "Sincere@april.biz",
     address: {
       street: "Kulas Light",
@@ -24,8 +24,8 @@ export const data = [
   },
   {
     id: 2,
-    name: "Ervin Howell",
-    username: "Antonette",
+    name: "Sandeep",
+    username: "sandeep",
     email: "Shanna@melissa.tv",
     address: {
       street: "Victor Plains",

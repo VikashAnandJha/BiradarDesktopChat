@@ -1,39 +1,55 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowBack, SendRounded } from "@mui/icons-material";
 import React, { useRef, useState, useEffect } from "react";
 import { IconButton } from "@mui/material";
 import { io } from "socket.io-client";
 
 // // Dummy data for messages
-// const messages = [
-//   { id: 1, sender: "me", text: "Hey, how are you?" },
-//   { id: 2, sender: "test user", text: "Hi! I'm good, thanks." },
-//   { id: 3, sender: "me", text: "What are you up to today?" },
-//   {
-//     id: 4,
-//     sender: "test user",
-//     text: "Just relaxing at home. How about you?",
-//   },
-//   { id: 5, sender: "me", text: "Same here. It's nice weather today!" },
-//   { id: 6, sender: "test user", text: "Yeah, it's perfect for staying in." },
-// ];
-
-// Dummy data for header
-const CURRENT_USER = "user_" + Math.random() * 10000;
+const conv_id = "668330cd8b9489835c197d7c";
+let CURRENT_USER = "user_" + Math.random() * 10000;
 const ChatScreen = ({ params }) => {
   const [msgList, setMsgList] = useState([]);
   const router = useRouter();
   const msgRef = useRef();
   const msgEndRef = useRef(null);
   const socketRef = useRef();
+  const searchParams = useSearchParams();
+
+  const me = searchParams.get("me");
 
   useEffect(() => {
+    CURRENT_USER = me;
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:4000/chat/getAllChats?conv_id=${conv_id}`
+        );
+        const data = await response.json();
+        if (data.success) {
+          let list = data.messages;
+
+          setMsgList(list);
+          console.log("Messages:", list);
+        } else {
+          console.error("Error fetching messages:", data.error);
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
+    };
+
+    fetchMessages();
+  }, [conv_id]);
+
+  useEffect(() => {
+    console.log("incoming");
     // Connect to the Socket.io server
-    socketRef.current = io("http://localhost:3001");
+    socketRef.current = io("http://localhost:3009");
 
     // Listen for incoming messages
     socketRef.current.on("receive_message", (message) => {
+      console.log(message);
       setMsgList((prevMsgList) => [...prevMsgList, message]);
     });
 
@@ -48,9 +64,10 @@ const ChatScreen = ({ params }) => {
     let msgText = msgRef.current.value;
 
     const newMessage = {
-      id: Math.random() * 10000,
-      sender: CURRENT_USER,
-      text: msgText,
+      msg_id: Math.random() * 10000 + "_msg",
+      from_user: me,
+      to_user: params.id,
+      message: msgText,
     };
 
     // Emit the message to the server
@@ -89,19 +106,19 @@ const ChatScreen = ({ params }) => {
       <div className="flex-1 overflow-y-auto p-4">
         {msgList.map((message) => (
           <div
-            key={message.id}
+            key={message.msg_id}
             className={`mb-4 ${
-              message.sender === CURRENT_USER ? "text-right" : "text-left"
+              message.from_user === CURRENT_USER ? "text-right" : "text-left"
             }`}
           >
             <div
               className={`inline-block px-4 py-2 rounded-lg ${
-                message.sender === CURRENT_USER
+                message.from_user === CURRENT_USER
                   ? "bg-blue-500 text-white"
                   : "bg-gray-300"
               }`}
             >
-              {message.text}
+              {message.message}
             </div>
           </div>
         ))}
