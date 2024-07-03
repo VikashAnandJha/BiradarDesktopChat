@@ -12,6 +12,7 @@ const LandingPage = () => {
           flexDirection: "column",
           alignItems: "center",
           mt: 8,
+          fontFamily: "Righteous, sans-serif",
         }}
       >
         {" "}

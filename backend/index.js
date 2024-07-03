@@ -6,6 +6,8 @@ const http = require("http");
 const chatRoutes = require("./routes/chatRoute");
 const dotenv = require("dotenv");
 const cors = require("cors"); // Import cors package
+const jwt = require("jsonwebtoken");
+const User = require("./schema/userSchema"); // Import user schema
 
 // Load environment variables from .env file
 dotenv.config();
@@ -38,6 +40,40 @@ app.use(bodyParser.json());
 
 // Routes
 app.use("/chat", chatRoutes);
+
+// Authentication route
+app.post("/auth/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res
+      .status(400)
+      .json({ message: "Please provide email and password" });
+  }
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await user.comparePassword(password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
+    }
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.json({ token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 // Socket.io event handlers
 io.on("connection", (socket) => {
@@ -82,5 +118,5 @@ server.listen(PORT, () => {
 });
 
 io.listen(3009, () => {
-  console.log("Socket.io server listening on port 3001");
+  console.log("Socket.io server listening on port 3009");
 });
