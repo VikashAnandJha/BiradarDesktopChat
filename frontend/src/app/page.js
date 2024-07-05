@@ -35,9 +35,14 @@ const LandingPage = () => {
           Stay in touch, collaborate, and share moments all in one place.
         </Typography>
         <Box sx={{ mt: 4, display: "flex", gap: 2 }}>
+          <Link href="/chat" passHref>
+            <Button variant="text" color="primary">
+              Chat
+            </Button>
+          </Link>
           <Link href="/signup" passHref>
-            <Button variant="contained" color="primary">
-              Sign Up
+            <Button variant="contained" color="info">
+              Signup
             </Button>
           </Link>
           <Link href="/signin" passHref>
