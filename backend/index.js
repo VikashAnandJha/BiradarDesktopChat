@@ -4,7 +4,8 @@ const mongoose = require("mongoose");
 const { Server } = require("socket.io");
 const http = require("http");
 const chatRoutes = require("./routes/chatRoute");
-const authRoutes = require("./routes/authRoute"); // Import auth routes
+const authRoutes = require("./routes/authRoute");
+const searchRoutes = require("./routes/searchRoute");
 const dotenv = require("dotenv");
 const cors = require("cors"); // Import cors package
 
@@ -40,6 +41,7 @@ app.use(bodyParser.json());
 // Routes
 app.use("/chat", chatRoutes);
 app.use("/auth", authRoutes); // Use auth routes
+app.use("/search", searchRoutes); // Use auth routes
 
 // Socket.io event handlers
 io.on("connection", (socket) => {
