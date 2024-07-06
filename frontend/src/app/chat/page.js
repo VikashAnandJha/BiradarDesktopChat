@@ -6,9 +6,14 @@ import Link from "next/link";
 import React from "react";
 import { Button, Box, IconButton } from "@mui/material";
 import { LogoutOutlined, SearchOutlined } from "@mui/icons-material";
+import { useRouter } from "next/navigation  ";
 
 function ChatScreen({ params }) {
-  const handleLogout = () => {
+  const router = useRouter();
+  const handleLogout = async () => {
+    await localStorage.removeItem("token");
+    router.replace("/");
+
     // Implement your logout logic here
     console.log("Logout clicked");
     // Redirect or clear session as needed
