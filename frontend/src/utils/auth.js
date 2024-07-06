@@ -8,3 +8,11 @@ export const isTokenExpired = (token) => {
 
   return decodedToken.exp < currentTime;
 };
+
+export const getUserId = () => {
+  let token = localStorage.getItem("token");
+  if (!token) throw new Error("Token is required");
+
+  const decodedToken = jwtDecode(token);
+  return decodedToken.userId; // Assuming the token contains `user_id`
+};

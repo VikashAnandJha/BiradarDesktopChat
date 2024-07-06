@@ -4,33 +4,32 @@ import { ArrowBack, SendRounded } from "@mui/icons-material";
 import React, { useRef, useState, useEffect } from "react";
 import { IconButton } from "@mui/material";
 import { io } from "socket.io-client";
+import { SERVER_URL } from "@/AppConfig";
+import axiosInstance from "@/utils/axiosConfig";
+import { getUserId } from "@/utils/auth";
 
-// // Dummy data for messages
-const conv_id = "668330cd8b9489835c197d7c";
-let CURRENT_USER = "user_" + Math.random() * 10000;
 const ChatScreen = ({ params }) => {
   const [msgList, setMsgList] = useState([]);
+  const [targetUser, setTargetUser] = useState(null);
   const router = useRouter();
+
   const msgRef = useRef();
   const msgEndRef = useRef(null);
   const socketRef = useRef();
   const searchParams = useSearchParams();
-
-  const me = searchParams.get("me");
-
+  const CURRENT_USER = getUserId();
   useEffect(() => {
-    CURRENT_USER = me;
     const fetchMessages = async () => {
       try {
-        const response = await fetch(
-          `http://localhost:4000/chat/getAllChats?conv_id=${conv_id}`
-        );
-        const data = await response.json();
+        const response = await axiosInstance.get(`/chat/getConv`, {
+          params: {
+            target_user_id: params.id,
+          },
+        });
+        const data = response.data;
         if (data.success) {
-          let list = data.messages;
-
-          setMsgList(list);
-          console.log("Messages:", list);
+          setMsgList(data.recent_messages);
+          setTargetUser(data.target_user);
         } else {
           console.error("Error fetching messages:", data.error);
         }
@@ -39,17 +38,17 @@ const ChatScreen = ({ params }) => {
       }
     };
 
-    fetchMessages();
-  }, [conv_id]);
+    if (params && params.id) {
+      fetchMessages();
+    }
+  }, [params]);
 
   useEffect(() => {
-    console.log("incoming");
     // Connect to the Socket.io server
     socketRef.current = io("http://localhost:3009");
 
     // Listen for incoming messages
     socketRef.current.on("receive_message", (message) => {
-      console.log(message);
       setMsgList((prevMsgList) => [...prevMsgList, message]);
     });
 
@@ -65,9 +64,10 @@ const ChatScreen = ({ params }) => {
 
     const newMessage = {
       msg_id: Math.random() * 10000 + "_msg",
-      from_user: me,
-      to_user: params.id,
+      from_user: getUserId(),
+      to_user: targetUser.id,
       message: msgText,
+      token: localStorage.getItem("token"),
     };
 
     // Emit the message to the server
@@ -99,7 +99,7 @@ const ChatScreen = ({ params }) => {
         <IconButton onClick={() => router.back()}>
           <ArrowBack />
         </IconButton>
-        <div className="text-xl font-bold ml-2">{params.id}</div>
+        <div className="text-xl font-bold ml-2">{targetUser?.name}</div>
       </div>
 
       {/* Messages */}

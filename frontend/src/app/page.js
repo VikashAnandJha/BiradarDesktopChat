@@ -42,18 +42,9 @@ const LandingPage = () => {
           Welcome to Biradar
         </Typography>
         <Typography component="p" variant="h5" align="center" gutterBottom>
-          Biradar is a chat/social/teams app designed to keep you connected with
-          your friends, family, and colleagues.
-        </Typography>
-        <Typography component="p" variant="h5" align="center" gutterBottom>
           Stay in touch, collaborate, and share moments all in one place.
         </Typography>
         <Box sx={{ mt: 4, display: "flex", gap: 2 }}>
-          <Link href="/chat" passHref>
-            <Button variant="text" color="primary">
-              Chat
-            </Button>
-          </Link>
           <Link href="/signup" passHref>
             <Button variant="contained" color="info">
               Signup

@@ -49,27 +49,32 @@ io.on("connection", (socket) => {
 
   // Listen for send_message event from the client
   socket.on("send_message", async (message) => {
-    console.log("Message received: ", message);
+    //console.log("Message received: ", message);
+    //since token is also coming and we dont want to send this to other user
+    let token = message.token;
+    message.token = null;
     io.emit("receive_message", message);
     // Call the route to save the message
     try {
+      if (!token) {
+        throw new Error("Token not found in socket data");
+      }
+
       const response = await fetch("http://localhost:4000/chat/addMessage", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(message),
       });
 
       const result = await response.json();
-      if (result.success) {
-        // Broadcast the message to all connected clients
-        // io.emit('receive_message', message);
-      } else {
-        console.error("Error saving message:", result.error);
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to send message");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error sending message:", error);
     }
   });
 
