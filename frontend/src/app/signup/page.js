@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Container,
@@ -14,6 +14,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Link from "next/link";
 import Image from "next/image";
 import { SERVER_URL } from "@/AppConfig";
+import { isTokenExpired } from "@/utils/auth";
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -45,6 +46,16 @@ const Signup = () => {
     }
   };
 
+  useEffect(() => {
+    let token = localStorage.getItem("token");
+    if (token != null) {
+      if (isTokenExpired(token)) {
+        localStorage.removeItem("token");
+      } else {
+        router.replace("/chat");
+      }
+    }
+  }, [router]);
   const classes = {};
   return (
     <Container component="main" maxWidth="xs">
