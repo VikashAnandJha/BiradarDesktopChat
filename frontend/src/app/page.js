@@ -1,9 +1,23 @@
-import React from "react";
+"use client";
+import React, { useEffect } from "react";
 import { Box, Button, Typography, Container } from "@mui/material";
 import Link from "next/link";
 import Image from "next/image";
+import { isTokenExpired } from "@/utils/auth";
+import { useRouter } from "next/navigation";
 
 const LandingPage = () => {
+  const router = useRouter();
+  useEffect(() => {
+    let token = localStorage.getItem("token");
+    if (token != null) {
+      if (isTokenExpired(token)) {
+        localStorage.removeItem("token");
+      } else {
+        router.replace("/chat");
+      }
+    }
+  }, [router]);
   return (
     <Container component="main" maxWidth="md">
       <Box
