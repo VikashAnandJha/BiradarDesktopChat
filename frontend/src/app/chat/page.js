@@ -6,7 +6,7 @@ import Link from "next/link";
 import React from "react";
 import { Button, Box, IconButton } from "@mui/material";
 import { LogoutOutlined, SearchOutlined } from "@mui/icons-material";
-import { useRouter } from "next/navigation  ";
+import { useRouter } from "next/navigation";
 
 function ChatScreen({ params }) {
   const router = useRouter();
