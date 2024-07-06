@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   TextField,
   Button,
@@ -12,11 +12,22 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { isTokenExpired } from "@/utils/auth";
 
 const Login = () => {
   const [error, setError] = useState(null);
   const router = useRouter();
 
+  useEffect(() => {
+    let token = localStorage.getItem("token");
+    if (token != null) {
+      if (isTokenExpired(token)) {
+        localStorage.removeItem("token");
+      } else {
+        router.replace("/chat");
+      }
+    }
+  }, [router]);
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
