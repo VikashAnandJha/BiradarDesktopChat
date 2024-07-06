@@ -1,29 +1,25 @@
 "use client";
+import { getUserId } from "@/utils/auth";
+import { useRouter } from "next/navigation";
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
-  const [usersList, setUserList] = useState([]);
-
+  const [userId, setUserId] = useState(null);
+  const router = useRouter();
   useEffect(() => {
-    const getUsersList = async () => {
-      try {
-        const resp = await fetch("https://jsonplaceholder.typicode.com/users");
-        const data = await resp.json();
-        console.log("userlist", data);
-        setUserList(data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-    getUsersList();
-  }, []);
+    try {
+      const userId = getUserId();
+      console.log(userId);
+      setUserId(userId);
+    } catch (error) {
+      router.replace("/");
+    }
+  }, [router]);
 
   return (
-    <UserContext.Provider value={{ usersList, setUserList }}>
-      {children}
-    </UserContext.Provider>
+    <UserContext.Provider value={{ userId }}>{children}</UserContext.Provider>
   );
 };
 

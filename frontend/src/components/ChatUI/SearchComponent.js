@@ -8,6 +8,7 @@ import ArrowBack from "@mui/icons-material/ArrowBack";
 import Link from "next/link";
 import SearchResultUserComponent from "./SearchResultUserComponent";
 import { SERVER_URL } from "@/AppConfig";
+import axiosInstance from "@/utils/axiosConfig";
 export default function SearchComponent() {
   const [email, setEmail] = useState("mailtovikashjha@gmail.com");
   const [userData, setUserData] = useState(null);
@@ -20,11 +21,13 @@ export default function SearchComponent() {
     }
 
     try {
-      const response = await fetch(SERVER_URL + `/search/user?email=${email}`);
-      const data = await response.json();
-      console.log(data);
+      const response = await axiosInstance.get(`/search/user`, {
+        params: { email },
+      });
 
-      if (!response.ok) {
+      const data = response.data;
+
+      if (!response.status === 200) {
         setError(data.message);
         setUserData(null);
       } else {

@@ -11,7 +11,9 @@ export const isTokenExpired = (token) => {
 
 export const getUserId = () => {
   let token = localStorage.getItem("token");
-  if (!token) throw new Error("Token is required");
+  if (!token) {
+    window.location.href = "/";
+  }
 
   const decodedToken = jwtDecode(token);
   return decodedToken.userId; // Assuming the token contains `user_id`
