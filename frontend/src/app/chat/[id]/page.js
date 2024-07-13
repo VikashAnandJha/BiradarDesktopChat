@@ -52,6 +52,7 @@ const ChatScreen = ({ params }) => {
     // Listen for incoming messages
     socketRef.current.on("receive_message", (message) => {
       setMsgList((prevMsgList) => [...prevMsgList, message]);
+      playIncomingSound();
     });
 
     return () => {
@@ -75,7 +76,7 @@ const ChatScreen = ({ params }) => {
     // Emit the message to the server
     socketRef.current.emit("send_message", newMessage);
 
-    playSound();
+    playOutgoingSound();
     msgRef.current.value = "";
   };
 
@@ -92,8 +93,12 @@ const ChatScreen = ({ params }) => {
     }
   }, [msgList]);
 
-  const playSound = () => {
+  const playOutgoingSound = () => {
     const audio = new Audio("/sounds/send.wav");
+    audio.play();
+  };
+  const playIncomingSound = () => {
+    const audio = new Audio("/sounds/incoming_msg.mp3");
     audio.play();
   };
 
