@@ -28,8 +28,10 @@ const ChatScreen = ({ params }) => {
         });
         const data = response.data;
         if (data.success) {
-          setMsgList(data.recent_messages);
+          let reveredOrderMsg = data.recent_messages.reverse();
+          setMsgList(reveredOrderMsg);
           setTargetUser(data.target_user);
+          console.log(reveredOrderMsg);
         } else {
           console.error("Error fetching messages:", data.error);
         }

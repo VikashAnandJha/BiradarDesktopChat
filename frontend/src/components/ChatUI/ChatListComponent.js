@@ -12,9 +12,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { data } from "./userslist";
-export default function ChatListComponent({}) {
-  const [usersList, setUserList] = useState(data);
-
+export default function ChatListComponent({ convList }) {
   const pathname = usePathname();
 
   const style = {
@@ -24,21 +22,26 @@ export default function ChatListComponent({}) {
   };
   return (
     <List sx={style}>
-      {usersList?.map((user) => {
+      {convList?.map((conv) => {
         return (
-          <Link key={user.email} href={"/chat/" + user.username}>
+          <Link
+            key={conv.target_user.email}
+            href={"/chat/" + conv.target_user._id}
+          >
             <ListItemButton
-              selected={pathname === "/chat/" + user.username ? true : false}
+              selected={
+                pathname === "/chat/" + conv.target_user._id ? true : false
+              }
             >
               <ListItem alignItems="flex-start">
                 <ListItemAvatar>
                   <Avatar
-                    alt={user.name}
-                    src={`https://i.pravatar.cc/150?u=${user.name}`}
+                    alt={conv.target_user.name}
+                    src={`https://i.pravatar.cc/150?u=${conv.target_user.name}`}
                   />
                 </ListItemAvatar>
                 <ListItemText
-                  primary={<b>{user.name}</b>}
+                  primary={<b>{conv.target_user.name}</b>}
                   secondary={
                     <React.Fragment>
                       <Typography
@@ -47,7 +50,7 @@ export default function ChatListComponent({}) {
                         variant="body2"
                         color="text.primary"
                       >
-                        Or bro kaha ja rhe
+                        {conv.last_message}
                       </Typography>
                     </React.Fragment>
                   }

@@ -48,26 +48,47 @@ router.post("/addMessage", authenticateToken, async (req, res) => {
   }
 });
 
-// Route to get all chat messages for a conversation
-router.get("/getAllChats", authenticateToken, async (req, res) => {
-  const { conv_id } = req.query;
-
-  if (!conv_id) {
-    return res.status(400).json({ error: "Missing conversation ID" });
-  }
+router.get("/getAllConv", authenticateToken, async (req, res) => {
+  const { userId } = req.user;
 
   try {
-    const messages = await ChatMessage.find({ conv_id }).sort({
-      created_at: -1,
-    });
+    // Find all conversations where the user is a participant
+    const conversations = await Conversation.find({ users: userId });
 
-    res.status(200).json({ success: true, messages });
+    // Prepare an array to hold the conversation details
+    const convDetails = await Promise.all(
+      conversations.map(async (conv) => {
+        // Find the last message in this conversation
+        const lastMessage = await ChatMessage.findOne({
+          conv_id: conv._id,
+        }).sort({ created_at: -1 });
+
+        if (lastMessage == null) return;
+
+        // Get the target user (the other participant)
+        const targetUserId = conv.users.find((id) => id !== userId);
+        console.log({ targetUserId });
+        if (targetUserId != null) {
+          const targetUser = await User.findById(targetUserId);
+          if (targetUser != null)
+            return {
+              conv_id: conv._id,
+              target_user: targetUser,
+              last_message: lastMessage.message,
+              last_message_sender:
+                lastMessage.from_user === userId ? "me" : "other",
+            };
+        }
+      })
+    );
+    convDetails1 = convDetails.filter((conv) => conv != null);
+
+    res.status(200).json({ success: true, conversations: convDetails1 });
   } catch (err) {
-    console.error(err);
+    console.error({ err });
     res.status(500).json({ error: "Internal server error" });
   }
 });
-
 // Route to get or create a conversation
 router.get("/getConv", authenticateToken, async (req, res) => {
   const { target_user_id } = req.query;
