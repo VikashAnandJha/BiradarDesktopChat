@@ -75,9 +75,7 @@ const ChatScreen = ({ params }) => {
     // Emit the message to the server
     socketRef.current.emit("send_message", newMessage);
 
-    // Update the local message list
-    //setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
-
+    playSound();
     msgRef.current.value = "";
   };
 
@@ -93,6 +91,11 @@ const ChatScreen = ({ params }) => {
       msgEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [msgList]);
+
+  const playSound = () => {
+    const audio = new Audio("/sounds/send.wav");
+    audio.play();
+  };
 
   return (
     <div className="flex flex-col h-screen">

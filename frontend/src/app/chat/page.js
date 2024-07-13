@@ -68,7 +68,7 @@ function AllChatScreen({ params }) {
 
     socketRef.current.on("receive_message", (message) => {
       console.log("Received message: ", message);
-
+      playSound();
       if (alreadyInList(message.from_user)) {
         //just update the msg
         updateMessageText(message.from_user, message.message);
@@ -80,6 +80,11 @@ function AllChatScreen({ params }) {
       socketRef.current.disconnect();
     };
   }, [convList]); // Add convList as a dependency
+
+  const playSound = () => {
+    const audio = new Audio("/sounds/incoming_msg.mp3");
+    audio.play();
+  };
 
   return (
     <UserProvider>
