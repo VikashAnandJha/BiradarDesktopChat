@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { UserProvider } from "../UserContext";
 import axiosInstance from "@/utils/axiosConfig";
 import { io } from "socket.io-client";
+import { getUserId } from "@/utils/auth";
 
 function AllChatScreen({ params }) {
   const socketRef = useRef();
@@ -66,7 +67,7 @@ function AllChatScreen({ params }) {
 
     socketRef.current = io("http://localhost:3009");
 
-    socketRef.current.on("receive_message", (message) => {
+    socketRef.current.on("chat-" + getUserId(), (message) => {
       console.log("Received message: ", message);
       playIncomingSound();
       if (alreadyInList(message.from_user)) {

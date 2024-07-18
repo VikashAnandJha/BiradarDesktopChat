@@ -50,7 +50,7 @@ const ChatScreen = ({ params }) => {
     socketRef.current = io("http://localhost:3009");
 
     // Listen for incoming messages
-    socketRef.current.on("receive_message", (message) => {
+    socketRef.current.on("chat-" + getUserId(), (message) => {
       setMsgList((prevMsgList) => [...prevMsgList, message]);
       playIncomingSound();
     });
@@ -72,7 +72,7 @@ const ChatScreen = ({ params }) => {
       message: msgText,
       token: localStorage.getItem("token"),
     };
-
+    setMsgList((prevMsgList) => [...prevMsgList, newMessage]);
     // Emit the message to the server
     socketRef.current.emit("send_message", newMessage);
 

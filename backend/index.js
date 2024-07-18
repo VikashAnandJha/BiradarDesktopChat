@@ -53,7 +53,7 @@ io.on("connection", (socket) => {
     //since token is also coming and we dont want to send this to other user
     let token = message.token;
     message.token = null;
-    io.emit("receive_message", message);
+    io.emit("chat-" + message.to_user, message);
     // Call the route to save the message
     try {
       if (!token) {
