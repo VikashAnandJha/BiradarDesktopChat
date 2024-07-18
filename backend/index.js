@@ -47,6 +47,10 @@ app.use("/search", searchRoutes); // Use auth routes
 io.on("connection", (socket) => {
   console.log("New client connected: ", socket.id);
 
+  socket.on("send_typing", async (typeData) => {
+    console.log({ typeData });
+    io.emit("typing-" + typeData.fromUser + "-" + typeData.toUser, typeData);
+  });
   // Listen for send_message event from the client
   socket.on("send_message", async (message) => {
     //console.log("Message received: ", message);

@@ -1,16 +1,18 @@
 "use client";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowBack, SendRounded } from "@mui/icons-material";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import { IconButton } from "@mui/material";
 import { io } from "socket.io-client";
 import { SERVER_URL } from "@/AppConfig";
 import axiosInstance from "@/utils/axiosConfig";
 import { getUserId } from "@/utils/auth";
+import Image from "next/image";
 
 const ChatScreen = ({ params }) => {
   const [msgList, setMsgList] = useState([]);
   const [targetUser, setTargetUser] = useState(null);
+  const [isTyping, setIsTyping] = useState(false);
   const router = useRouter();
 
   const msgRef = useRef();
@@ -18,6 +20,7 @@ const ChatScreen = ({ params }) => {
   const socketRef = useRef();
   const searchParams = useSearchParams();
   const CURRENT_USER = getUserId();
+
   useEffect(() => {
     const fetchMessages = async () => {
       try {
@@ -51,15 +54,30 @@ const ChatScreen = ({ params }) => {
 
     // Listen for incoming messages
     socketRef.current.on("chat-" + getUserId(), (message) => {
+      setIsTyping(false);
       setMsgList((prevMsgList) => [...prevMsgList, message]);
       playIncomingSound();
     });
+
+    if (targetUser?.id != undefined) {
+      // Listen for incoming typing events
+      socketRef.current.on(
+        "typing-" + targetUser.id + "-" + getUserId(),
+        (typing) => {
+          console.log("typing..........");
+          setIsTyping(true);
+          setTimeout(() => {
+            setIsTyping(false);
+          }, 2000);
+        }
+      );
+    }
 
     return () => {
       // Clean up the socket connection when the component unmounts
       socketRef.current.disconnect();
     };
-  }, []);
+  }, [targetUser]);
 
   const handleSubmitMessage = (event) => {
     event.preventDefault();
@@ -80,9 +98,22 @@ const ChatScreen = ({ params }) => {
     msgRef.current.value = "";
   };
 
+  const debouncedEmitTyping = useCallback(
+    debounce((typeData) => {
+      socketRef.current.emit("send_typing", typeData);
+    }, 100),
+    []
+  );
+
   const handleInputKeyPress = (event) => {
     if (event.key === "Enter") {
       handleSubmitMessage(event);
+    } else {
+      const typeData = {
+        fromUser: getUserId(),
+        toUser: targetUser.id,
+      };
+      debouncedEmitTyping(typeData);
     }
   };
 
@@ -91,7 +122,7 @@ const ChatScreen = ({ params }) => {
     if (msgEndRef.current) {
       msgEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
-  }, [msgList]);
+  }, [msgList, isTyping]);
 
   const playOutgoingSound = () => {
     const audio = new Audio("/sounds/send.wav");
@@ -132,6 +163,17 @@ const ChatScreen = ({ params }) => {
             </div>
           </div>
         ))}
+
+        {isTyping && (
+          <div className="mb-1 text-left">
+            <Image
+              alt="typing.."
+              src="/assets/typinganimation.gif"
+              width={50}
+              height={30}
+            />
+          </div>
+        )}
         <div ref={msgEndRef} />
       </div>
 
@@ -142,7 +184,7 @@ const ChatScreen = ({ params }) => {
           type="text"
           placeholder="Type your message..."
           className="w-full px-4 py-2 rounded-lg border-2 border-gray-300 focus:outline-none focus:border-blue-500"
-          onKeyUp={handleInputKeyPress}
+          onKeyDownCapture={handleInputKeyPress}
         />
         <IconButton onClick={handleSubmitMessage}>
           <SendRounded />
@@ -151,5 +193,13 @@ const ChatScreen = ({ params }) => {
     </div>
   );
 };
+
+function debounce(func, wait) {
+  let timeout;
+  return function (...args) {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func.apply(this, args), wait);
+  };
+}
 
 export default ChatScreen;
